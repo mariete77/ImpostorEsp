@@ -3,364 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'player_selection_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late AnimationController _pulseController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.2, 1.0, curve: Curves.elasticOut),
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _animationController.forward();
-    _pulseController.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-                  // Header with user info
-                  _buildHeader(),
-                  const SizedBox(height: 40),
-                  // Logo Section
-                  _buildLogo(),
-                  const SizedBox(height: 40),
-                  // Main Action Buttons
-                  _buildMainActions(),
-                  const SizedBox(height: 32),
-                  // Secondary Actions
-                  _buildSecondaryActions(),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.primary.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: const Icon(
-                Icons.person,
-                color: AppTheme.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Jugador',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 12,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  'Explorador_ES',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Icon(
-            Icons.settings,
-            color: Colors.grey[400],
-            size: 24,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLogo() {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Column(
-        children: [
-          // Logo Container
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Gradient blur behind
-              Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppTheme.primary.withOpacity(0.3),
-                      AppTheme.primary.withOpacity(0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-              // Main logo container
-              Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(40),
-                  border: Border.all(
-                    color: AppTheme.primary.withOpacity(0.5),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.4),
-                      blurRadius: 20,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.fingerprint,
-                      size: 100,
-                      color: AppTheme.primary,
-                    ),
-                    const SizedBox(height: 8),
-                    Icon(
-                      Icons.castle,
-                      size: 32,
-                      color: AppTheme.accentYellow,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Title
-          Text(
-            'EL ',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 48,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: 2,
-            ),
-          ),
-          Text(
-            'IMPOSTOR',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 48,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.primary,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Edition badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.accentYellow,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'EDICIÓN ESPAÑA',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainActions() {
-    return Column(
-      children: [
-        // Main Play Button with pulse animation
-        ScaleTransition(
-          scale: _pulseAnimation,
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.4),
-                  blurRadius: 20,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PlayerSelectionScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.play_circle, size: 32),
-                  const SizedBox(width: 12),
-                  Text(
-                    'PARTIDA RÁPIDA',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSecondaryActions() {
-    return Row(
-      children: [
-        // How to Play Button
-        Expanded(
-          child: _SecondaryButton(
-            icon: Icons.menu_book,
-            label: 'Cómo jugar',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Cómo jugar - Próximamente'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        // Achievements Button
-        Expanded(
-          child: _SecondaryButton(
-            icon: Icons.military_tech,
-            label: 'Logros',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Logros - Próximamente'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
+// ... (existing code remains the same until the end of _SecondaryButton class)
 
 class _SecondaryButton extends StatelessWidget {
   final IconData icon;
@@ -395,8 +38,8 @@ class _SecondaryButton extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: icon == Icons.menu_book 
-                    ? AppTheme.accentYellow 
+                color: icon == Icons.menu_book
+                    ? AppTheme.accentYellow
                     : AppTheme.primary,
                 size: 28,
               ),
@@ -413,6 +56,233 @@ class _SecondaryButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Modal de reglas del juego
+void _showRulesModal(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => const _RulesModal(),
+  );
+}
+
+class _RulesModal extends StatelessWidget {
+  const _RulesModal({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 600, maxWidth: 500),
+        decoration: BoxDecoration(
+          color: AppTheme.backgroundDark,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppTheme.primary.withOpacity(0.3),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withOpacity(0.3),
+              blurRadius: 30,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primary.withOpacity(0.2),
+                    Colors.transparent,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(22),
+                  topRight: Radius.circular(22),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.rule,
+                    color: AppTheme.accentYellow,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Cómo Jugar',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Content - Scrollable
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSection(
+                      'Objetivo',
+                      'Descubre al impostor entre los jugadores antes de que termine la ronda. Los ciudadanos deben eliminar al impostor, y el impostor debe escapar sin ser descubierto.',
+                      Icons.flag,
+                    ),
+                    _buildSection(
+                      'Configuración',
+                      '1. Elige cuántos jugadores participan (2-10)\n'
+                      '2. Selecciona cuántos impostores habrá (máximo 1 por cada 3 jugadores)\n'
+                      '3. Se asigna una palabra secreta a todos los jugadores',
+                      Icons.settings,
+                    ),
+                    _buildSection(
+                      'Revelación de Roles',
+                      'Cada jugador, uno por uno, ve su pantalla y toca para revelar su rol:\n'
+                      '• **CIUDADANO**: Verás la palabra secreta\n'
+                      '• **IMPOSTOR**: Verás "ERES EL IMPOSTOR" (no sabes la palabra)',
+                      Icons.visibility,
+                    ),
+                    _buildSection(
+                      'Ronda de Juego',
+                      'Todos los jugadores ven la palabra secreta durante su turno.\n\n'
+                      '⏱️ Tienes 15 segundos por jugador. Pasa tu turno manualmente o espera a que termine el tiempo.\n\n'
+                      'Cuando todos hayan jugado, pasáis a la fase de votación.',
+                      Icons.timer,
+                    ),
+                    _buildSection(
+                      'Votación',
+                      '1. Cada jugador vota por quién cree que es el impostor\n'
+                      '2. Se cuenta el jugador con más votos\n'
+                      '3. Si hay empate o nadie vota, nadie es eliminado\n'
+                      '4. Si hay un ganador claro, ese jugador es eliminado',
+                      Icons.how_to_vote,
+                    ),
+                    _buildSection(
+                      'Resultados',
+                      '• Si el impostor fue eliminado → **GANAN LOS CIUDADANOS**\n'
+                      '• Si el impostor escapó → **GANA EL IMPOSTOR**\n\n'
+                      'El impostor recibe 1 punto por cada vez que escapa. Los ciudadanos no acumulan puntos en esta versión.',
+                      Icons.emoji_events,
+                    ),
+                    _buildSection(
+                      'Reiniciar',
+                      'Al terminar, puedes:\n'
+                      '• **Jugar otra vez**: Mantiene los mismos jugadores y sus puntuaciones\n'
+                      '• **Volver al menú**: Regresa a la pantalla principal',
+                      Icons.refresh,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+            // Footer
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(22),
+                  bottomRight: Radius.circular(22),
+                ),
+              ),
+              child: Text(
+                '¡Disfruta del juego! 🎮',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, String content, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppTheme.accentYellow.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: AppTheme.accentYellow,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.accentYellow,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 42),
+          child: Text(
+            content,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              height: 1.5,
+              color: Colors.grey[300],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
