@@ -1,0 +1,33 @@
+name: impostor_espana
+description: Juego estilo Among Us con temática española
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # State Management
+  provider: ^6.1.2
+  
+  # Navigation
+  go_router: ^14.2.2
+  
+  # Typography
+  google_fonts: ^6.2.1
+  
+  # Local Storage (para guardar stats si no usamos Supabase inicialmente)
+  shared_preferences: ^2.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  # Assets se agregarán cuando estén disponibles
