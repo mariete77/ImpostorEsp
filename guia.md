@@ -15,8 +15,7 @@
 - [Sprint 6: Revelación de Roles](#sprint-6-revelación-de-roles)
 - [Sprint 7: Ronda de Juego](#sprint-7-ronda-de-juego)
 - [Sprint 8: Votación y Resultados](#sprint-8-votación-y-resultados)
-- [Sprint 9: Gestión de Partidas (PostgreSQL)](#sprint-9-gestión-de-partidas-postgresql)
-- [Sprint 10: Pulido Final](#sprint-10-pulido-final)
+- [Sprint 9: Pulido Final](#sprint-9-pulido-final)
 
 ---
 
@@ -168,26 +167,7 @@
 
 ---
 
-## Sprint 9: Gestión de Partidas (PostgreSQL)
-
-- [ ] Crear proyecto en Supabase (PostgreSQL gratuito)
-- [ ] Diseñar tablas:
-  - `games` → id, fecha, palabra, duración, ganador
-  - `players_scores` → jugador, puntuación total, partidas jugadas, victorias
-- [ ] Implementar `supabase_service.dart`:
-  - Conexión a Supabase
-  - CRUD para partidas
-  - Ranking de jugadores
-- [ ] Crear pantalla `stats_screen.dart`:
-  - Mostrar mejores jugadores (top 10)
-  - Estadísticas de partidas jugadas
-  - Palabras más usadas
-- [ ] Guardar cada partida al finalizar
-- [ ] Commit: "feat: supabase integration for game history and rankings"
-
----
-
-## Sprint 10: Pulido Final
+## Sprint 9: Pulido Final (Sprint 10 original)
 
 - [ ] Añadir más de 100 palabras/temas españoles (revisar categorías)
 - [ ] Implementar efectos de sonido:
@@ -233,8 +213,10 @@
      - Ciudadanos: NO reciben puntos por eliminar (regla actual)
    - **Nota:** Podría ajustarse en futuras versiones
 
-4. **Persistencia local:**
-   - Pendiente para Sprint 9 (Supabase)
+4. **Persistencia de datos:**
+   - ❌ **No implementada** - Partidas locales sin persistencia
+   - **Razón:** App para partidas rápidas, no requiere estadísticas persistentes
+   - Futuro: Podría añadirse si se desea historial
 
 ### Palabras/Temas Español
 
@@ -256,13 +238,13 @@
 
 **Última actualización:** 2025-03-13
 
-**Sprints completados:** 8/10
+**Sprints completados:** 8/9
 
-**Tareas totales:** ~80
+**Tareas totales:** ~70
 
 **Tareas completadas:** ~70
 
-**Estado actual:** Sprints 0-8 implementados y jugables. Juego funcional en Flutter con todas las pantallas working. Pendiente: persistencia de datos (Sprint 9) y sonidos/pulido (Sprint 10).
+**Estado actual:** Sprints 0-8 implementados y jugables. Juego funcional en Flutter con todas las pantallas working. Pendiente: Pulido Final (Sprint 9 - sonidos, responsive, testing y release).
 
 **Último commit:** `f982e79` - Merge remote-tracking branch 'origin/main' and fix compilation errors
 
@@ -274,7 +256,6 @@ Tener un juego **ImpostorEsp** completo en Flutter, jugable en Android/iOS, con:
 - Partidas locales multijugador (mismo dispositivo)
 - +100 palabras 100% españolas
 - Animaciones fluidas y sonidos
-- Estadísticas persistentes en PostgreSQL/Supabase
 - Preparado para publicación en stores
 
 ---
