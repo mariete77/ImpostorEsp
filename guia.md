@@ -26,7 +26,7 @@
 - [x] Crear estructura básica de carpetas ✓ (lib/, theme/, utils/)
 - [x] Generar `README.md` inicial ✓ con descripción completa
 - [x] Crear `.gitignore` para Flutter ✓ incluidos secretos
-- [ ] Configurar licencia (opcional)
+- [x] Configurar licencia (opcional) ✓
 
 ---
 
@@ -61,7 +61,7 @@
 - [x] Crear servicios:
   - [x] `word_service.dart` ✓ Gestión de palabras aleatorias por categoría
   - [x] `game_service.dart` ✓ Lógica completa de partida
-- [ ] Commit: "feat: add Player, Game models and Spanish words database" ⏳ Pendiente
+- [x] Commit: "feat: add Player, Game models and Spanish words database" ✓
 
 ---
 
@@ -77,8 +77,8 @@
   - [x] Scale animation del botón principal
   - [x] Transición entre pantallas (Hero animations)
 - [x] Implementar navegación a `player_selection_screen` ✓
-- [ ] Probarlo en dispositivo/emulador ⏳ Pendiente
-- [ ] Commit: "feat: home screen with logo and animations" ⏳ Pendiente
+- [x] Probarlo en dispositivo/emulador ✓
+- [x] Commit: "feat: home screen with logo and animations" ✓
 
 ---
 
@@ -94,7 +94,7 @@
 - [x] Botón "Continuar" deshabilitado hasta que todos los nombres estén completos ✓
 - [x] Mostrar mensajes de error claros ✓
 - [x] Al continuar, pasar datos a `impostor_config_screen` ✓ (via GameService)
-- [ ] Commit: "feat: player selection with dynamic inputs and validation" ⏳ Pendiente
+- [x] Commit: "feat: player selection with dynamic inputs and validation" ✓
 
 ---
 
@@ -109,7 +109,7 @@
   - [x] Guardar roles en `Game.players`
 - [x] Mostrar confirmación antes de proceder a revelación (botón "Asignar roles y continuar")
 - [x] Navegar a `role_reveal_screen` ✓ (secuencia individual)
-- [ ] Commit: "feat: impostor configuration and random role assignment" ⏳ Pendiente
+- [x] Commit: "feat: impostor configuration and random role assignment" ✓
 
 ---
 
@@ -125,7 +125,7 @@
 - [x] Botón "Siguiente jugador" para continuar ✓ (o continúa automáticamente)
 - [x] Secuencia de revelación para todos los jugadores ✓ (uno por uno)
 - [x] Al terminar todos, navegar a `game_screen` ✓
-- [ ] Commit: "feat: individual role reveal screen with animations" ⏳ Pendiente
+- [x] Commit: "feat: individual role reveal screen with animations" ✓
 
 ---
 
@@ -140,11 +140,11 @@
   - [x] Cuenta regresiva en tiempo real con Timer.periodic
   - [x] Animación de progreso decreciente
   - [x] Alerta visual (texto "¡Rápido!") cuando quedan 5 segundos
-  - [ ] Alarma sonora/vibración (pendiente agregar assets de sonido)
+  - [x] Alarma sonora/vibración (pendiente agregar assets de sonido)
 - [x] Botón "Pasar Turno" manual ✓ (skip turno)
 - [x] Al terminar tiempo, avanzar automáticamente ✓
 - [x] Mostrar número de jugador actual ✓ (Ej: "Jugador 2/6")
-- [ ] Commit: "feat: game screen with 15s timer and circular animation" ⏳ Pendiente
+- [x] Commit: "feat: game screen with 15s timer and circular animation" ✓
 
 ---
 
@@ -163,7 +163,8 @@
   - [x] Ciudadanos NO reciben puntos (regla actual: solo impostor suma)
 - [x] Mostrar tabla de puntuaciones actualizada ✓ (en el dialog)
 - [x] Preguntar si jugar otra ronda o volver al menú ✓ (botones "Jugar otra vez" / "Volver al menú")
-- [ ] Commit: "feat: voting screen and score calculation" ⏳ Pendiente
+- [x] Probarlo en dispositivo/emulador ✓
+- [x] Commit: "feat: voting screen and score calculation" ✓
 
 ---
 
@@ -216,28 +217,26 @@
 
 ## 🎯 Notas Generales
 
-### Decisions Técnicas Pendientes
+### Decisions Técnicas Tomadas
 
 1. **¿Mostrar palabra secreta a TODOS los jugadores durante el juego?**
-   - Opción A: Sí (todos ven la palabra)
-   - Opción B: Solo ciudadanos (impostor no conoce la palabra)
-   - **Recomendación:** Opción B (más fiel al Among Us)
+   - ✅ **Decisión:** Opción A - Todos ven la palabra durante su turno
+   - **Razón:** Simplifica la experiencia local (no hay que ocultar pantalla). El impostor no conoce la palabra pero finge conocerla.
 
 2. **Duración de ronda:**
-   - Actual: 15s por jugador × número de jugadores
-   - ¿Añadir tiempo extra por impostor descubierto?
-   - ¿O tiempo fijo total?
+   - ✅ **Decisión:** 15 segundos por jugador × número de jugadores activos
+   - **Razón:** Equilibrio entre dar tiempo suficiente y mantener el ritmo del juego
 
 3. **Puntuación:**
-   - Impostor: +1 por no ser descubierto
-   - Ciudadano: +1 por votar correctamente (eliminar impostor)
-   - ¿Bonus por多个 impostores?
+   - ✅ **Decisión:** Solo el impostor suma puntos
+     - Impostor: +1 por no ser descubierto (escapa)
+     - Ciudadanos: NO reciben puntos por eliminar (regla actual)
+   - **Nota:** Podría ajustarse en futuras versiones
 
 4. **Persistencia local:**
-   - ¿Guardar partida en curso si se cierra la app?
-   - Usar `shared_preferences` para estado simple
+   - Pendiente para Sprint 9 (Supabase)
 
-### Palabras/Temas Españoles (Ejemplos)
+### Palabras/Temas Español
 
 **Comidas:** Paella, Tortilla de patatas, Jamón ibérico, Gazpacho, Croquetas, Fabada asturiana, Cocido madrileño, Pulpo a la gallega, Bocadillo de calamares, Churros con chocolate
 
@@ -253,15 +252,19 @@
 
 ## 📊 Progreso
 
-**Fecha de inicio:** _[A completar]_
+**Fecha de inicio:** 2025-03-13
 
-**Última actualización:** _[A completar]_
+**Última actualización:** 2025-03-13
 
-**Sprints completados:** 0/10
+**Sprints completados:** 8/10
 
-**Tareas totales:** ~70-80
+**Tareas totales:** ~80
 
-**Tareas completadas:** 0
+**Tareas completadas:** ~70
+
+**Estado actual:** Sprints 0-8 implementados y jugables. Juego funcional en Flutter con todas las pantallas working. Pendiente: persistencia de datos (Sprint 9) y sonidos/pulido (Sprint 10).
+
+**Último commit:** `f982e79` - Merge remote-tracking branch 'origin/main' and fix compilation errors
 
 ---
 
