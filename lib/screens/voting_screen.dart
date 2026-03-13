@@ -34,7 +34,7 @@ class _VotingScreenState extends State<VotingScreen> {
 
     await Future.delayed(const Duration(milliseconds: 500)); // Simular procesamiento
 
-    // Contar votos (versión simplificada: solo el jugador actual vota)
+    // Contar votos (versión简化: solo el jugador actual vota)
     final votes = <String, int>{_selectedPlayerId!: 1};
 
     _gameService.processVoting(votes);
