@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
@@ -7,13 +6,7 @@ import 'theme/app_theme.dart';
 
 void main() {
   runApp(
-    MultiProvider(
-      providers: [
-        // Aquí irán los providers globales
-        // ChangeNotifierProvider(create: (_) => GameService()),
-      ],
-      child: const ImpostorEspApp(),
-    ),
+    const ImpostorEspApp(),
   );
 }
 

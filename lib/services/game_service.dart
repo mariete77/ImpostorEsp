@@ -50,7 +50,8 @@ class GameService {
   }
 
   /// Asigna palabras y roles (llamar después de createGame)
-  void assignRolesAndWord() {
+  /// [impostorCount] - número de impostores a asignar
+  void assignRolesAndWord(int impostorCount) {
     if (_currentGame == null) {
       throw StateError('No hay juego activo');
     }
@@ -60,8 +61,8 @@ class GameService {
     _currentGame!.secretWord = wordPair.word;
     _currentGame!.category = wordPair.category;
 
-    // Asignar roles aleatorios
-    Game.assignRoles(_currentGame!, _currentGame!.impostorCount);
+    // Asignar roles aleatorios usando el número de impostores seleccionado
+    Game.assignRoles(_currentGame!, impostorCount);
   }
 
   /// Inicia la fase de revelación de roles
@@ -147,6 +148,26 @@ class GameService {
     _currentGame!.phase = GamePhase.ended;
   }
 
+  /// Reinicia el juego manteniendo los mismos jugadores y sus puntuaciones
+  void resetGameKeepScores() {
+    if (_currentGame != null) {
+      // Guardar las puntuaciones actuales
+      final scores = <String, int>{};
+      for (var player in _currentGame!.players) {
+        scores[player.id] = player.score;
+      }
+      
+      // Reiniciar estados pero mantener puntuaciones
+      for (var player in _currentGame!.players) {
+        player.status = PlayerStatus.waiting;
+        // Mantener la puntuación
+      }
+      
+      _currentGame!.currentRound = 1;
+      _currentGame!.phase = GamePhase.setup;
+    }
+  }
+  
   /// Reinicia el juego manteniendo los mismos jugadores
   void resetGame() {
     if (_currentGame != null) {

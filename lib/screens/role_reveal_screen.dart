@@ -5,7 +5,9 @@ import '../services/game_service.dart';
 import 'game_screen.dart';
 
 class RoleRevealScreen extends StatefulWidget {
-  const RoleRevealScreen({super.key});
+  final GameService gameService;
+
+  const RoleRevealScreen({super.key, required this.gameService});
 
   @override
   State<RoleRevealScreen> createState() => _RoleRevealScreenState();
@@ -18,10 +20,12 @@ class _RoleRevealScreenState extends State<RoleRevealScreen>
   late Animation<double> _flipAnimation;
   bool _isRevealed = false;
   bool _canContinue = false;
+  late GameService _gameService;
 
   @override
   void initState() {
     super.initState();
+    _gameService = widget.gameService;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -49,7 +53,6 @@ class _RoleRevealScreenState extends State<RoleRevealScreen>
     });
     _animationController.forward();
     
-    // Pequeño delay antes de habilitar el botón
     Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) {
         setState(() {
@@ -60,23 +63,19 @@ class _RoleRevealScreenState extends State<RoleRevealScreen>
   }
 
   void _continueToNext() {
-    // Guardar el juego y avanzar
-    final gameService = GameService(); // En producción, inyectar
-    final hasMore = gameService.nextRevealPlayer();
+    final hasMore = _gameService.nextRevealPlayer();
 
     if (hasMore) {
-      // Resetear para siguiente jugador
       setState(() {
         _isRevealed = false;
         _canContinue = false;
       });
       _animationController.reset();
     } else {
-      // Terminado, ir al juego
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const GameScreen(),
+          builder: (context) => GameScreen(gameService: _gameService),
         ),
       );
     }
@@ -84,131 +83,152 @@ class _RoleRevealScreenState extends State<RoleRevealScreen>
 
   @override
   Widget build(BuildContext context) {
-    final gameService = GameService();
-    final currentPlayer = gameService.currentGame?.getCurrentPlayer();
+    final currentPlayer = _gameService.currentGame?.getCurrentPlayer();
 
     if (currentPlayer == null) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundDark,
         body: Center(
-          child: Text('Error: No hay jugador actual'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Error: No hay jugador actual',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Volver'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    'Revelación ${gameService.currentGame?.currentRound ?? 1}/${gameService.currentGame?.totalPlayers ?? 0}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 48), // Balance close button
-                ],
-              ),
-            ),
-
-            // Contenido principal
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Avatar/número del jugador
-                    _PlayerAvatar(playerName: currentPlayer.name),
-                    const SizedBox(height: 40),
-
-                    // Card de revelación
-                    _RevealCard(
-                      isRevealed: _isRevealed,
-                      isImpostor: currentPlayer.isImpostor,
-                      secretWord: gameService.currentGame?.secretWord ?? '',
-                      animation: _flipAnimation,
-                      onTap: () => _revealRole(context),
+                    const SizedBox(width: 48),
+                    Text(
+                      'El Impostor',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    const SizedBox(height: 40),
-
-                    // Botón continuar
-                    if (_canContinue)
-                      _ContinueButton(onPressed: _continueToNext),
-                    if (!_isRevealed)
-                      const _TapToRevealText(),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ],
                 ),
-              ),
+                
+                const SizedBox(height: 16),
+                
+                // Title
+                Text(
+                  '¿Quién eres?',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Asegúrate de que nadie esté mirando',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    color: Colors.grey[400],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                
+                // Reveal Card
+                _RevealCard(
+                  isRevealed: _isRevealed,
+                  isImpostor: currentPlayer.isImpostor,
+                  secretWord: _gameService.currentGame?.secretWord ?? '',
+                  animation: _flipAnimation,
+                  onTap: () => _revealRole(context),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Hint
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info, color: AppTheme.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Mantén tu identidad en secreto hasta el final de la ronda. Si eres el impostor, trata de deducir la palabra secreta escuchando a los demás.',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Footer Action
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _canContinue ? _continueToNext : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _canContinue ? AppTheme.primary : Colors.grey[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      _canContinue ? 'He visto mi rol' : '¿Listo? Toca la tarjeta para revelar',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _PlayerAvatar extends StatelessWidget {
-  final String playerName;
-
-  const _PlayerAvatar({required this.playerName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppTheme.red,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              playerName[0].toUpperCase(),
-              style: GoogleFonts.rubik(
-                fontSize: 48,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          playerName,
-          style: GoogleFonts.rubik(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        const Text(
-          '¿Eres el impostor?',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -235,213 +255,246 @@ class _RevealCard extends StatelessWidget {
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
+          final angle = animation.value * 3.14159;
+          final showBack = animation.value > 0.5;
+          
           return Transform(
             alignment: Alignment.center,
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
-              ..rotateY(animation.value * 3.14159),
-            child: Container(
-              width: 280,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: isRevealed
-                    ? _buildRevealedContent()
-                    : _buildHiddenContent(),
-              ),
-            ),
+              ..rotateY(angle),
+            child: showBack
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(3.14159),
+                    child: _buildCardContent(),
+                  )
+                : _buildCardContent(),
           );
         },
       ),
     );
   }
 
-  Widget _buildHiddenContent() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.visibility_off, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          'Toca para revelar',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.grey[500],
-            fontWeight: FontWeight.w500,
-          ),
+  Widget _buildCardContent() {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primary.withOpacity(0.3),
+          width: 2,
         ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 20),
+          ),
+        ],
+      ),
+      child: isRevealed
+          ? _buildRevealedContent()
+          : _buildHiddenContent(),
+    );
+  }
+
+  Widget _buildHiddenContent() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.visibility_off,
+              size: 30,
+              color: AppTheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Contenido Oculto',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Toca la tarjeta para revelar',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              color: Colors.grey[400],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB366FF), // Morado brillante
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 8,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.fingerprint, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Revelar mi rol',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildRevealedContent() {
     if (isImpostor) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              color: Colors.red,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person_off,
-              size: 48,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'ERES EL',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Text(
-            'IMPOSTOR',
-            style: TextStyle(
-              fontSize: 28,
-              color: AppTheme.red,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '😈 Finge que sabes la palabra',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              color: AppTheme.yellow,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.visibility,
-              size: 48,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Eres',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Text(
-            'CIUDADANO',
-            style: TextStyle(
-              fontSize: 22,
-              color: Colors.black87,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppTheme.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.red, width: 2),
-            ),
-            child: Text(
-              secretWord.toUpperCase(),
-              style: GoogleFonts.rubik(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: AppTheme.red,
-                letterSpacing: 1.5,
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.theater_comedy,
+                size: 30,
+                color: Colors.red,
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '¡No se lo digas al impostor!',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              fontStyle: FontStyle.italic,
+            const SizedBox(height: 12),
+            Text(
+              '¡ERES EL',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                color: Colors.grey[400],
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+            Text(
+              'IMPOSTOR!',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+                letterSpacing: 2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No dejes que te pillen',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                color: Colors.grey[400],
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: AppTheme.yellow.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.visibility,
+                size: 30,
+                color: AppTheme.yellow,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Eres',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                color: Colors.grey[400],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              'CIUDADANO',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primary, width: 2),
+              ),
+              child: Text(
+                secretWord.toUpperCase(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '¡No se lo digas al impostor!',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 11,
+                color: Colors.grey[400],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
       );
     }
-  }
-}
-
-class _TapToRevealText extends StatelessWidget {
-  const _TapToRevealText();
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: 0.7,
-      duration: const Duration(milliseconds: 1000),
-      child: const Text(
-        '¿Listo? Toca la tarjeta para ver tu rol',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey,
-          fontStyle: FontStyle.italic,
-        ),
-      ),
-    );
-  }
-}
-
-class _ContinueButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _ContinueButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: const Icon(Icons.arrow_forward, size: 24),
-      label: Text(
-        'Siguiente jugador',
-        style: GoogleFonts.rubik(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        backgroundColor: AppTheme.yellow,
-        foregroundColor: Colors.black87,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        elevation: 8,
-      ),
-    );
   }
 }

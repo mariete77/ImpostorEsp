@@ -2,11 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colores de la bandera española
-  static const Color red = Color(0xFFAA151B);     // Rojo bandera España
-  static const Color yellow = Color(0xFFF1BF00);  // Amarillo bandera España
+  // Colores del diseño - Tema púrpura/amarillo
+  static const Color primary = Color(0xFF7311d4);     // Púrpura principal
+  static const Color accentYellow = Color(0xFFfacc15); // Amarillo accent
+  static const Color backgroundLight = Color(0xFFf7f6f8);
+  static const Color backgroundDark = Color(0xFF191022);
+  
+  // Colores originales (por si acaso)
+  static const Color red = Color(0xFFAA151B);
+  static const Color yellow = Color(0xFFF1BF00);
   static const Color darkRed = Color(0xFF8B0000);
   static const Color lightYellow = Color(0xFFFFE55C);
+
+  // Efectos de neón
+  static List<BoxShadow> get neonGlow => [
+    BoxShadow(
+      color: primary.withOpacity(0.4),
+      blurRadius: 15,
+      spreadRadius: 0,
+    ),
+  ];
+  
+  static List<BoxShadow> get accentGlow => [
+    BoxShadow(
+      color: accentYellow.withOpacity(0.3),
+      blurRadius: 15,
+      spreadRadius: 0,
+    ),
+  ];
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -152,113 +175,126 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
-        primary: red,
+        primary: primary,
         onPrimary: Colors.white,
-        secondary: yellow,
+        secondary: accentYellow,
         onSecondary: Colors.black87,
-        surface: Color(0xFF1E1E1E),
+        surface: backgroundDark,
         onSurface: Colors.white,
-        background: Color(0xFF121212),
-        onBackground: Colors.white,
         error: Colors.red,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.rubikTextTheme().copyWith(
-        displayLarge: GoogleFonts.rubik(
+      scaffoldBackgroundColor: backgroundDark,
+      textTheme: GoogleFonts.spaceGroteskTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.spaceGrotesk(
           fontSize: 57,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w700,
           color: Colors.white,
+          letterSpacing: -1,
         ),
-        displayMedium: GoogleFonts.rubik(
+        displayMedium: GoogleFonts.spaceGrotesk(
           fontSize: 45,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w700,
           color: Colors.white,
+          letterSpacing: -0.5,
         ),
-        displaySmall: GoogleFonts.rubik(
+        displaySmall: GoogleFonts.spaceGrotesk(
           fontSize: 36,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
-        headlineLarge: GoogleFonts.rubik(
+        headlineLarge: GoogleFonts.spaceGrotesk(
           fontSize: 32,
           fontWeight: FontWeight.w600,
-          color: lightYellow,
+          color: accentYellow,
         ),
-        headlineMedium: GoogleFonts.rubik(
+        headlineMedium: GoogleFonts.spaceGrotesk(
           fontSize: 28,
           fontWeight: FontWeight.w600,
-          color: lightYellow,
+          color: accentYellow,
         ),
-        headlineSmall: GoogleFonts.rubik(
+        headlineSmall: GoogleFonts.spaceGrotesk(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: lightYellow,
+          color: accentYellow,
         ),
-        titleLarge: GoogleFonts.rubik(
+        titleLarge: GoogleFonts.spaceGrotesk(
           fontSize: 22,
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
-        titleMedium: GoogleFonts.rubik(
+        titleMedium: GoogleFonts.spaceGrotesk(
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
-        bodyLarge: GoogleFonts.rubik(
+        bodyLarge: GoogleFonts.spaceGrotesk(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: Colors.white70,
         ),
-        bodyMedium: GoogleFonts.rubik(
+        bodyMedium: GoogleFonts.spaceGrotesk(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: Colors.white70,
         ),
-        labelLarge: GoogleFonts.rubik(
+        labelLarge: GoogleFonts.spaceGrotesk(
           fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: Colors.black87,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: red,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
-          elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: yellow,
+          backgroundColor: accentYellow,
           foregroundColor: Colors.black87,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 2,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        color: const Color(0xFF1E1E1E),
+        color: Colors.white.withOpacity(0.05),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF2C2C2C),
+        fillColor: Colors.white.withOpacity(0.05),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.grey),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: red, width: 2),
+          borderSide: const BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -267,7 +303,7 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: red,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,

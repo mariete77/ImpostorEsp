@@ -78,18 +78,25 @@ class Game {
   static void assignRoles(Game game, int impostorCount) {
     final random = List<Player>.from(game.players)..shuffle();
     
-    // Resetear roles primero
-    for (var player in game.players) {
-      player = player.copyWith(role: PlayerRole.citizen);
+    // Resetear roles primero - actualizar los objetos originales
+    for (int i = 0; i < game.players.length; i++) {
+      game.players[i] = game.players[i].copyWith(role: PlayerRole.citizen);
     }
     
-    // Asignar impostores
+    // Asignar impostores - actualizar los objetos en la lista mezclada
     for (int i = 0; i < impostorCount && i < random.length; i++) {
       random[i] = random[i].copyWith(role: PlayerRole.impostor);
     }
     
-    // Actualizar la lista original
-    game.players = random;
+    // Sincronizar: actualizar los objetos originales con los roles asignados
+    for (int i = 0; i < game.players.length; i++) {
+      for (int j = 0; j < random.length; j++) {
+        if (game.players[i].id == random[j].id) {
+          game.players[i] = random[j];
+          break;
+        }
+      }
+    }
   }
 
   // Calcular ganador (después de votación)

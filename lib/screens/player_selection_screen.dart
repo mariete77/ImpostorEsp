@@ -27,7 +27,6 @@ class _PlayerSelectionScreenState extends State<PlayerSelectionScreen> {
   }
 
   void _initializeControllers(int count) {
-    // Limpiar existentes
     for (var controller in _nameControllers) {
       controller.dispose();
     }
@@ -37,13 +36,11 @@ class _PlayerSelectionScreenState extends State<PlayerSelectionScreen> {
     _nameControllers.clear();
     _focusNodes.clear();
 
-    // Crear nuevos
     for (int i = 0; i < count; i++) {
       _nameControllers.add(TextEditingController());
       _focusNodes.add(FocusNode());
     }
 
-    // Actualizar validación
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _validateForm();
     });
@@ -77,10 +74,12 @@ class _PlayerSelectionScreenState extends State<PlayerSelectionScreen> {
     if (!_canContinue) return;
 
     try {
-      // Crear juego en el servicio
+      // Calcular impostores basados en el número de jugadores (regla: 1 impostor por cada 3-4 jugadores)
+      final impostorCount = (_playerCount / 4).ceil().clamp(1, (_playerCount / 3).floor());
+      
       _gameService.createGame(
         playerNames: _getPlayerNames(),
-        impostorCount: 1, // Se elegirá en la siguiente pantalla
+        impostorCount: impostorCount,
         timePerPlayer: 15,
       );
 
@@ -89,14 +88,17 @@ class _PlayerSelectionScreenState extends State<PlayerSelectionScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ImpostorConfigScreen(gameService: _gameService),
+          builder: (context) => ImpostorConfigScreen(
+            gameService: _gameService,
+            playerCount: _playerCount,
+          ),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: AppTheme.red,
+          backgroundColor: AppTheme.primary,
         ),
       );
     }
@@ -116,97 +118,151 @@ class _PlayerSelectionScreenState extends State<PlayerSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundDark,
       appBar: AppBar(
-        title: const Text('Jugadores'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.go('/'),
         ),
+        title: Text(
+          'Ajustes de la Partida',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Selector de número de jugadores
-            _PlayerCountSelector(
-              playerCount: _playerCount,
-              onChanged: _onPlayerCountChanged,
-            ),
-            const SizedBox(height: 24),
-            
-            // Lista de campos de nombre
-            Expanded(
-              child: ListView.builder(
-                itemCount: _playerCount,
-                itemBuilder: (context, index) {
-                  return _PlayerNameField(
-                    index: index,
-                    controller: _nameControllers[index],
-                    focusNode: _focusNodes[index],
-                    onChanged: (_) => _validateForm(),
-                    onNext: () {
-                      if (index < _focusNodes.length - 1) {
-                        _focusNodes[index + 1].requestFocus();
-                      } else {
-                        // Último campo, intentar continuar
-                        if (_canContinue) {
-                          _continueToConfig();
-                        }
-                      }
-                    },
-                    onSubmitted: (_) => _onNext(index),
-                  );
-                },
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              // Title & Visual
+              _buildHeader(),
+              const SizedBox(height: 32),
+              // Player Count Control
+              _PlayerCountSelector(
+                playerCount: _playerCount,
+                onChanged: _onPlayerCountChanged,
               ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Botón continuar
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _canContinue ? _continueToConfig : null,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Continuar',
-                  style: GoogleFonts.rubik(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+              const SizedBox(height: 24),
+              // Player Names
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _playerCount,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _PlayerNameField(
+                        index: index,
+                        controller: _nameControllers[index],
+                        focusNode: _focusNodes[index],
+                        onChanged: (_) => _validateForm(),
+                        onSubmitted: (_) {
+                          if (index < _focusNodes.length - 1) {
+                            _focusNodes[index + 1].requestFocus();
+                          }
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-            
-            // Mensaje de error si hay duplicados
-            if (!_canContinue && _getUniqueNames().length != _nameControllers.length)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Los nombres deben ser únicos',
-                  style: TextStyle(
-                    color: AppTheme.red,
-                    fontSize: 14,
+              // Error message
+              if (!_canContinue && _getUniqueNames().length != _nameControllers.length)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Los nombres deben ser únicos',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.red[400],
+                      fontSize: 14,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-          ],
+              // Continue Button
+              _buildContinueButton(),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _onNext(int index) {
-    if (index < _focusNodes.length - 1) {
-      _focusNodes[index + 1].requestFocus();
-    }
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.group_work,
+            size: 40,
+            color: AppTheme.primary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'El Impostor',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Ingresa los nombres de los jugadores',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            color: Colors.grey[400],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContinueButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _canContinue ? _continueToConfig : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppTheme.primary.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Continuar',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, size: 24),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -221,58 +277,130 @@ class _PlayerCountSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Número de jugadores',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: playerCount > 2 ? () => onChanged(playerCount - 1) : null,
-                  tooltip: 'Menos jugadores',
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.groups, color: AppTheme.primary, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Número de Jugadores',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '$playerCount',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.primary,
                 ),
-                Text(
-                  '$playerCount',
-                  style: GoogleFonts.rubik(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.red,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              // Decrease button
+              GestureDetector(
+                onTap: playerCount > 4 ? () => onChanged(playerCount - 1) : null,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: playerCount > 4 
+                        ? AppTheme.primary.withOpacity(0.2) 
+                        : AppTheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.remove,
+                    color: playerCount > 4 ? AppTheme.primary : AppTheme.primary.withOpacity(0.5),
+                    size: 18,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: playerCount < 10 ? () => onChanged(playerCount + 1) : null,
-                  tooltip: 'Más jugadores',
-                ),
-              ],
-            ),
-            Slider(
-              value: playerCount.toDouble(),
-              min: 2,
-              max: 10,
-              divisions: 8,
-              onChanged: (value) => onChanged(value.round()),
-              activeColor: AppTheme.red,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Recomendado: 4-8 jugadores',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
               ),
-            ),
-          ],
-        ),
+              // Slider
+              Expanded(
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 6,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                    activeTrackColor: AppTheme.primary,
+                    inactiveTrackColor: Colors.grey[700],
+                    thumbColor: Colors.white,
+                    overlayColor: AppTheme.primary.withOpacity(0.2),
+                  ),
+                  child: Slider(
+                    value: playerCount.toDouble(),
+                    min: 4,
+                    max: 10,
+                    divisions: 6,
+                    onChanged: (value) => onChanged(value.round()),
+                  ),
+                ),
+              ),
+              // Increase button
+              GestureDetector(
+                onTap: playerCount < 10 ? () => onChanged(playerCount + 1) : null,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: playerCount < 10 
+                        ? AppTheme.primary.withOpacity(0.2) 
+                        : AppTheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: playerCount < 10 ? AppTheme.primary : AppTheme.primary.withOpacity(0.5),
+                    size: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '4',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
+              ),
+              Text(
+                '10',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -283,7 +411,6 @@ class _PlayerNameField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
-  final VoidCallback onNext;
   final ValueChanged<String> onSubmitted;
 
   const _PlayerNameField({
@@ -291,38 +418,57 @@ class _PlayerNameField extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onChanged,
-    required this.onNext,
     required this.onSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        autocorrect: false,
-        textCapitalization: TextCapitalization.words,
-        decoration: InputDecoration(
-          labelText: 'Jugador ${index + 1}',
-          hintText: 'Nombre del jugador',
-          prefixIcon: CircleAvatar(
-            backgroundColor: AppTheme.red,
-            foregroundColor: Colors.white,
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      style: GoogleFonts.spaceGrotesk(color: Colors.white),
+      autocorrect: false,
+      textCapitalization: TextCapitalization.words,
+      decoration: InputDecoration(
+        hintText: 'Nombre del jugador ${index + 1}',
+        hintStyle: GoogleFonts.spaceGrotesk(color: Colors.grey[500]),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.05),
+        prefixIcon: Container(
+          width: 40,
+          height: 40,
+          margin: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
+            color: AppTheme.primary,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
             child: Text(
               '${index + 1}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
           ),
-          errorText: controller.text.trim().isEmpty ? 'Campo requerido' : null,
         ),
-        onChanged: onChanged,
-        onSubmitted: (value) {
-          onNext();
-        },
-        textInputAction: index < 9 ? TextInputAction.next : TextInputAction.done,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: index < 19 ? TextInputAction.next : TextInputAction.done,
     );
   }
 }
