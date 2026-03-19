@@ -35,10 +35,15 @@ class _ImpostorConfigScreenState extends State<ImpostorConfigScreen> {
   }
 
   int get _maxImpostors {
-    return (widget.playerCount / 3).floor().clamp(1, widget.playerCount - 1);
+    // Permitir hasta playerCount - 1 (al menos 1 ciudadano debe haber)
+    return widget.playerCount - 1;
   }
 
   int get _minImpostors => 1;
+
+  int get _recommendedImpostors {
+    return (widget.playerCount / 4).ceil().clamp(1, (widget.playerCount / 3).floor());
+  }
 
   void _assignRolesAndStart() {
     final game = widget.gameService.currentGame;
@@ -113,6 +118,7 @@ class _ImpostorConfigScreenState extends State<ImpostorConfigScreen> {
                 impostorCount: _impostorCount,
                 maxImpostors: _maxImpostors,
                 minImpostors: _minImpostors,
+                recommendedImpostors: _recommendedImpostors,
                 onChanged: (value) {
                   setState(() {
                     _impostorCount = value;
@@ -291,12 +297,14 @@ class _ImpostorCountSelector extends StatelessWidget {
   final int impostorCount;
   final int maxImpostors;
   final int minImpostors;
+  final int recommendedImpostors;
   final ValueChanged<int> onChanged;
 
   const _ImpostorCountSelector({
     required this.impostorCount,
     required this.maxImpostors,
     required this.minImpostors,
+    required this.recommendedImpostors,
     required this.onChanged,
   });
 
@@ -425,6 +433,36 @@ class _ImpostorCountSelector extends StatelessWidget {
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 12,
                   color: Colors.grey[500],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentYellow.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.accentYellow.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.star,
+                      size: 12,
+                      color: AppTheme.accentYellow,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Recomendado: $recommendedImpostors',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.accentYellow,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Text(

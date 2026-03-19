@@ -343,7 +343,7 @@ class _RevealCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: null,
+              onPressed: onTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFB366FF), // Morado brillante
                 foregroundColor: Colors.white,

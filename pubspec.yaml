@@ -20,6 +20,9 @@ dependencies:
   # Typography
   google_fonts: ^6.2.1
   
+  # Audio
+  audioplayers: ^5.2.1
+  
   # Local Storage (para guardar stats si no usamos Supabase inicialmente)
   shared_preferences: ^2.3.4
 
@@ -30,4 +33,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # Assets se agregarán cuando estén disponibles
+  
+  assets:
+    - assets/audio/

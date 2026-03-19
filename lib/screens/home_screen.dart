@@ -1,9 +1,278 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
+import '../utils/design_constants.dart';
+import '../services/audio_service.dart';
 import 'player_selection_screen.dart';
 
-// ... (existing code remains the same until the end of _SecondaryButton class)
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _neonController;
+  late Animation<double> _neonAnimation;
+  late AudioService _audioService;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioService = AudioService();
+    
+    _neonController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+    _neonAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _neonController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _neonController.repeat(reverse: true);
+    
+    // Iniciar música de fondo después de que el widget está montado
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _audioService.playBackgroundMusic();
+    });
+  }
+
+  @override
+  void dispose() {
+    _neonController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundDark,
+      body: Stack(
+        children: [
+          // Fondo con huella dactilar animada
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _neonAnimation,
+              builder: (context, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppTheme.backgroundDark,
+                        AppTheme.backgroundDark.withValues(alpha: 0.95),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Opacity(
+                      opacity: _neonAnimation.value * 0.15,
+                      child: Icon(
+                        Icons.fingerprint,
+                        size: 350,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Contenido principal
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo/Icon con efecto de neón pulsante
+                    AnimatedBuilder(
+                      animation: _neonAnimation,
+                      builder: (context, child) {
+                        return Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppTheme.primary,
+                                AppTheme.primary.withValues(alpha: 0.6),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: AppShadows.neon(
+                              AppTheme.primary.withValues(alpha: _neonAnimation.value),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.fingerprint,
+                            size: 64,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Title
+                    Text(
+                      'El Impostor',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Descubre al traidor',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        color: Colors.grey[400],
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+
+                    // Main Play Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 64,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Detener música al comenzar el juego
+                          _audioService.stopMusic();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PlayerSelectionScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 8,
+                          shadowColor: AppTheme.primary.withOpacity(0.5),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.play_arrow, size: 32),
+                            const SizedBox(width: 12),
+                            Text(
+                              'JUGAR AHORA',
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Secondary Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SecondaryButton(
+                            icon: Icons.menu_book,
+                            label: 'Cómo Jugar',
+                            onPressed: () => _showRulesModal(context),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _SecondaryButton(
+                            icon: Icons.history,
+                            label: 'Historial',
+                            onPressed: () {
+                              // TODO: Implement history screen
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Próximamente'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 48),
+
+                    // Footer
+                    Text(
+                      'Versión 2.0',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Botón de música flotante
+          Positioned(
+            top: 16,
+            right: 16,
+            child: _MusicToggleButton(
+              audioService: _audioService,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MusicToggleButton extends StatelessWidget {
+  final AudioService audioService;
+
+  const _MusicToggleButton({
+    required this.audioService,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: audioService,
+      builder: (context, child) {
+        return FloatingActionButton(
+          heroTag: 'music_button',
+          mini: true,
+          onPressed: () {
+            audioService.toggleMusic();
+          },
+          backgroundColor: audioService.isMusicEnabled
+              ? AppTheme.primary.withOpacity(0.9)
+              : Colors.grey.withOpacity(0.6),
+          child: Icon(
+            audioService.isMusicEnabled ? Icons.music_note : Icons.music_off,
+            color: Colors.white,
+          ),
+        );
+      },
+    );
+  }
+}
 
 class _SecondaryButton extends StatelessWidget {
   final IconData icon;
