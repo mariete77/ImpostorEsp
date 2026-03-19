@@ -9,7 +9,8 @@ ImpostorEsp es una adaptación del clásico juego de的风格 Among Us, diseñad
 ## 🎯 Características principales
 
 - **Multijugador local:** 2-10 jugadores en un solo dispositivo
-- **Temática española:** Palabras relacionadas con comida, ciudades, tradiciones y personajes famosos de España
+- **Temática española:** 200+ palabras relacionadas con comida, ciudades, tradiciones y personajes famosos de España
+- **8 categorías con emojis:** Comidas, Ciudades, Tradiciones, Personajes, Monumentos, Deportes, TV, Animales
 - **Modo revelación individual:** Cada jugador conoce su rol en secreto
 - **Sistema de votación:** Decide quién es el impostor
 - **Puntuación:** Gana el impostor si no lo descubren, ganan los ciudadanos si lo eliminan
@@ -78,6 +79,19 @@ lib/
     └── ...
 ```
 
+## 🎨 Palabras temáticas
+
+El juego incluye más de **200 palabras españolas** organizadas en 8 categorías con emojis:
+
+- **🍽️ Comidas y Bebidas (35):** Paella, Tortilla de patatas, Jamón ibérico, Gazpacho, Croquetas, Churros, Vino tinto...
+- **🏙️ Ciudades y Pueblos (30):** Madrid, Barcelona, Sevilla, Granada, Valencia, Bilbao, Salamanca...
+- **🎉 Tradiciones y Festividades (25):** La Tomatina, San Fermín, Fallas, Carnaval de Cádiz, Semana Santa...
+- **👥 Personajes y Famosos (30):** Picasso, Cervantes, Dalí, Gaudí, Rosalía, Aitana, Nadal, Alcaraz...
+- **🏛️ Monumentos y Lugares (25):** La Alhambra, Sagrada Familia, Camino de Santiago, Museo del Prado...
+- **⚽ Deportes y Eventos (20):** Fútbol, Baloncesto, Tenis, Fórmula 1, MotoGP, Pádel...
+- **📺 Televisión y Streaming (20):** La Casa de Papel, Élite, MasterChef, Netflix, Movistar+...
+- **🐶 Animales (15):** Toro bravo, Lince ibérico, Oso pardo, Águila imperial...
+
 ## 🎮 Cómo jugar
 
 1. **Configurar partida:**
@@ -130,15 +144,15 @@ Ver [guia.md](guia.md) para el plan completo de desarrollo con 10 sprints.
 
 **Sprints:**
 1. ✅ Configuración del proyecto Flutter
-2. ⏳ Modelos de datos y base de palabras
-3. ⏳ Pantalla de inicio
-4. ⏳ Selección de jugadores
-5. ⏳ Configuración de impostores
-6. ⏳ Revelación de roles
-7. ⏳ Ronda de juego
-8. ⏳ Votación y resultados
+2. ✅ Modelos de datos y base de palabras (200+ palabras en 8 categorías)
+3. ✅ Pantalla de inicio
+4. ✅ Selección de jugadores
+5. ✅ Configuración de impostores
+6. ✅ Revelación de roles
+7. ✅ Ronda de juego
+8. ✅ Votación y resultados
 9. ⏳ Gestión de partidas (PostgreSQL)
-10. ⏳ Pulido final
+10. ⏳ Pulido final (sonidos, responsive, testing)
 
 ## 🤝 Contribuir
 

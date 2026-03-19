@@ -169,7 +169,7 @@
 
 ## Sprint 9: Pulido Final (Sprint 10 original)
 
-- [ ] Añadir más de 100 palabras/temas españoles (revisar categorías)
+- [x] Añadir más de 200 palabras/temas españoles (revisar categorías) ✓ (8 categorías con emojis)
 - [ ] Implementar efectos de sonido:
   - Temporizador ticking
   - Alarma últimos 5s
@@ -244,7 +244,7 @@
 
 **Tareas completadas:** ~70
 
-**Estado actual:** Sprints 0-8 implementados y jugables. Juego funcional en Flutter con todas las pantallas working. Pendiente: Pulido Final (Sprint 9 - sonidos, responsive, testing y release).
+**Estado actual:** Sprints 0-8 implementados y jugables. Juego funcional en Flutter con todas las pantallas working. **200+ palabras** añadidas en 8 categorías. Pendiente: Pulido Final (Sprint 9 - sonidos, responsive, testing y release).
 
 **Último commit:** `f982e79` - Merge remote-tracking branch 'origin/main' and fix compilation errors
 
